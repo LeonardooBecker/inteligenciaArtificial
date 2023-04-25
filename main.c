@@ -4,12 +4,18 @@
 #include <time.h>
 #include <unistd.h>
 
+#define ANSI_RESET "\033[0m"
+#define ANSI_RED "\033[31m"
+#define ANSI_GREEN "\033[32m"
+#define ANSI_BLUE "\033[34m"
+
 #define TAM_LINHA 1024
 
 typedef struct
 {
     int verificar;
     int valor;
+    int camadaExterna;
 
 } Verificar;
 
@@ -19,6 +25,21 @@ typedef struct
     int num_linhas;
     int num_colunas;
 } Parametros;
+
+int retornaNumero(Verificar **mapa, Parametros param)
+{
+    for (int a = 0; a < param.num_linhas; a++)
+    {
+        for (int b = 0; b < param.num_colunas; b++)
+        {
+            if ((mapa[a][b].camadaExterna) == 1)
+            {
+                return mapa[a][b].valor;
+            }
+        }
+    }
+    return (rand() % (param.num_cores + 1));
+}
 
 void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casas)
 {
@@ -32,73 +53,85 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     esquerda = &(mapa[i][j - 1]);
     direita = &(mapa[i][j + 1]);
     atual = &(mapa[i][j]);
-    // system("clear");
-    // for (int a = 0; a < param.num_linhas; a++)
-    // {
-    //     for (int b = 0; b < param.num_colunas; b++)
-    //     {
-    //         // printf("%2d ", mapa[i][j].valor);
-    //         if (mapa[a][b].verificar == 1)
-    //             printf("%3d ", mapa[a][b].valor);
-    //         else
-    //             printf("%3d ", mapa[a][b].verificar);
-    //     }
-    //     printf("\n");
-    // }
-    // sleep(10);
-    if ((direita->verificar == 1) && (direita->valor != atual->valor) && (j < (param.num_linhas - 1)))
+    if ((j < (param.num_linhas - 1)) && (direita->verificar == 1) && (direita->valor != atual->valor))
     {
         direita->valor = atual->valor;
+        atual->camadaExterna = 0;
         verificaDireita(mapa, i, (j + 1), param, casas);
     }
-    if ((direita->verificar == 0) && (direita->valor == atual->valor) && (j < (param.num_linhas - 1)))
+    if ((j < (param.num_linhas - 1)) && (direita->verificar == 0) && (direita->valor == atual->valor))
     {
         *casas += 1;
+        atual->camadaExterna = 0;
         direita->valor = atual->valor;
         direita->verificar = 1;
         verificaDireita(mapa, i, (j + 1), param, casas);
     }
+    else if (j < (param.num_linhas - 1) && (direita->verificar == 0) && (direita->valor != atual->valor))
+    {
+        atual->camadaExterna = 0;
+        direita->camadaExterna = 1;
+    }
 
     if ((i < (param.num_colunas - 1) && (baixo->verificar == 1) && (baixo->valor != atual->valor)))
     {
+        atual->camadaExterna = 0;
         baixo->valor = atual->valor;
         verificaDireita(mapa, (i + 1), j, param, casas);
     }
     if ((i < (param.num_colunas - 1) && (baixo->verificar == 0) && (baixo->valor == atual->valor)))
     {
         *casas += 1;
+        atual->camadaExterna = 0;
         baixo->valor = atual->valor;
         baixo->verificar = 1;
         verificaDireita(mapa, (i + 1), j, param, casas);
     }
+    else if (i < (param.num_colunas - 1) && (baixo->verificar == 0) && (baixo->valor != atual->valor))
+    {
+        atual->camadaExterna = 0;
+        baixo->camadaExterna = 1;
+    }
 
     if ((j > 0) && (esquerda->verificar == 1) && (esquerda->valor != atual->valor))
     {
+        atual->camadaExterna = 0;
         esquerda->valor = atual->valor;
         verificaDireita(mapa, i, (j - 1), param, casas);
     }
     if ((j > 0) && (esquerda->verificar == 0) && (esquerda->valor == atual->valor))
     {
         *casas += 1;
+        atual->camadaExterna = 0;
         esquerda->valor = atual->valor;
         esquerda->verificar = 1;
         verificaDireita(mapa, i, (j - 1), param, casas);
     }
+    else if ((j > 0) && (esquerda->verificar == 0) && (esquerda->valor != atual->valor))
+    {
+        atual->camadaExterna = 0;
+        esquerda->camadaExterna = 1;
+    }
 
     if ((i > 0) && (cima->verificar == 1) && (cima->valor != atual->valor))
     {
+        atual->camadaExterna = 0;
         cima->valor = atual->valor;
         verificaDireita(mapa, (i - 1), j, param, casas);
     }
     if ((i > 0) && (cima->verificar == 0) && (cima->valor == atual->valor))
     {
         *casas += 1;
+        atual->camadaExterna = 0;
         cima->valor = atual->valor;
         cima->verificar = 1;
         verificaDireita(mapa, (i - 1), j, param, casas);
     }
-
-    // printf("((%d %d))\n",i,j);
+    else if ((i > 0) && (cima->verificar == 0) && (cima->valor != atual->valor))
+    {
+        atual->camadaExterna = 0;
+        cima->camadaExterna = 1;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -170,6 +203,7 @@ int main(int argc, char *argv[])
                 {
                     mapa[j][i].valor = atoi(ptr);
                     mapa[i][j].verificar = 0;
+                    mapa[i][j].camadaExterna = 0;
                     i++;
                     ptr = strtok(NULL, " ");
                 }
@@ -187,37 +221,46 @@ int main(int argc, char *argv[])
     param.num_colunas = parametros[1];
     param.num_cores = parametros[2];
 
-    int num_linhas = parametros[0];
-    int num_colunas = parametros[1];
-    // for (i = 0; i < (num_linhas/2); i++)
-    // {
-    //     for (j = 0; j < (num_colunas/2); j++)
-    //     {
-    //         matrizValoracao[i][(num_colunas-j)]=i*j+1;
-    //         matrizValoracao[i][j]=i*j+1;
-    //     }
-    // }
-
     mapa[0][0].verificar = 1;
     int num;
     int casas = 1;
     int count = 0;
     while (casas != 900)
     {
-        num = rand() % (parametros[2] + 1);
-        fprintf(solu,"a %d ",num);
+        // num = rand() % (parametros[2] + 1);
+        num = retornaNumero(mapa, param);
+        fprintf(solu, "a %d ", num);
         mapa[0][0].valor = num;
         verificaDireita(mapa, 0, 0, param, &casas);
+        system("clear");
+        for (int a = 0; a < param.num_linhas; a++)
+        {
+            for (int b = 0; b < param.num_colunas; b++)
+            {
+                if ((mapa[a][b].verificar) == 1)
+                {
+                    printf("%s%2d %s", ANSI_GREEN, mapa[a][b].valor, ANSI_RESET);
+                }
+                else if ((mapa[a][b].camadaExterna) == 1)
+                    printf("%s%2c %s", ANSI_RED, '1', ANSI_RESET);
+                else
+                    printf("%s%2c %s", ANSI_BLUE, '0', ANSI_RESET);
+                // printf("%3d ", mapa[a][b].camadaExterna);
+            }
+            printf("\n");
+        }
+        // sleep(1);
         count++;
     }
-    fseek(solu,0,SEEK_SET);
-    fprintf(solu,"%d\n",count);
+
+    fseek(solu, 0, SEEK_SET);
+    fprintf(solu, "%d\n", count);
     printf("\nTotal de passos %d\n", count);
+
     for (i = 0; i < parametros[0]; i++)
     {
         for (j = 0; j < parametros[1]; j++)
         {
-            // printf("%2d ", mapa[i][j].valor);
             if (mapa[i][j].verificar == 1)
                 printf("%3d ", mapa[i][j].valor);
             else
@@ -226,15 +269,6 @@ int main(int argc, char *argv[])
         printf("\n");
     }
     printf("\n\n%d\n\n", casas);
-    if (i == 0 && j == 0)
-    {
-    }
-
-    // int atual=mapa[i][j].valor;
-    // int direita=mapa[i+1][j].valor;
-    // int baixo=mapa[i][j+1].valor;
-    // int esquerda=mapa[i-1][j].valor;
-    // int cima=mapa[i][j-1].valor;
 
     fclose(arq);
     fclose(solu);
