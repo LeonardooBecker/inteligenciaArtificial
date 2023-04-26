@@ -5,9 +5,16 @@
 #include <unistd.h>
 
 #define ANSI_RESET "\033[0m"
-#define ANSI_RED "\033[31m"
-#define ANSI_GREEN "\033[32m"
-#define ANSI_BLUE "\033[34m"
+#define C_BRIGHT_CYAN "\x1b[96m"
+#define C_RED "\033[31m"
+#define C_GREEN "\033[32m"
+#define C_YELLOW "\033[33m"
+#define C_BLUE "\033[34m"
+#define C_MAGENTA "\033[35m"
+#define C_CYAN "\033[36m"
+#define C_GRAY "\033[37m"
+#define C_LIGHT_YELLOW "\x1b[93m"
+#define C_LIGHT_BLUE "\x1b[94m"
 
 #define TAM_LINHA 1024
 
@@ -26,19 +33,83 @@ typedef struct
     int num_colunas;
 } Parametros;
 
+void imprimeMapa(Verificar **mapa, Parametros param)
+{
+    for (int a = 0; a < param.num_linhas; a++)
+    {
+        for (int b = 0; b < param.num_colunas; b++)
+        {
+            if (mapa[a][b].camadaExterna == 1)
+                printf("%s%2d %s", C_RED, mapa[a][b].valor, ANSI_RESET);
+            else
+                printf("%s%2d %s", C_BLUE, mapa[a][b].valor, ANSI_RESET);
+
+            // switch (mapa[a][b].valor)
+            // {
+            // case 1:
+            //     printf("%s%2c %s", C_BRIGHT_CYAN, '1', ANSI_RESET);
+            //     break;
+            // case 2:
+            //     printf("%s%2c %s", C_RED, '2', ANSI_RESET);
+            //     break;
+            // case 3:
+            //     printf("%s%2c %s", C_GREEN, '3', ANSI_RESET);
+            //     break;
+            // case 4:
+            //     printf("%s%2c %s", C_YELLOW, '4', ANSI_RESET);
+            //     break;
+            // case 5:
+            //     printf("%s%2c %s", C_BLUE, '5', ANSI_RESET);
+            //     break;
+            // case 6:
+            //     printf("%s%2c %s", C_MAGENTA, '6', ANSI_RESET);
+            //     break;
+            // case 7:
+            //     printf("%s%2c %s", C_CYAN, '7', ANSI_RESET);
+            //     break;
+            // case 8:
+            //     printf("%s%2c %s", C_GRAY, '8', ANSI_RESET);
+            //     break;
+            // case 9:
+            //     printf("%s%2c %s", C_LIGHT_BLUE, '9', ANSI_RESET);
+            //     break;
+            // case 10:
+            //     printf("%s%d %s", C_LIGHT_YELLOW, 10, ANSI_RESET);
+            //     break;
+            // default:
+            //     printf("%2d ", mapa[a][b].valor);
+            //     break;
+            // }
+        }
+        printf("\n");
+    }
+}
+
 int retornaNumero(Verificar **mapa, Parametros param)
 {
+    int *vet_cores = malloc(param.num_cores * sizeof(int));
+    for (int i = 0; i < (param.num_cores); i++)
+        vet_cores[i] = 0;
     for (int a = 0; a < param.num_linhas; a++)
     {
         for (int b = 0; b < param.num_colunas; b++)
         {
             if ((mapa[a][b].camadaExterna) == 1)
             {
-                return mapa[a][b].valor;
+                vet_cores[(mapa[a][b].valor - 1)] += 1;
             }
         }
     }
-    return (rand() % (param.num_cores + 1));
+    int index_maior = 1;
+    for (int i = 0; i < (param.num_cores); i++)
+    {
+        if ((vet_cores[i]) > (vet_cores[index_maior]))
+        {
+            index_maior = i;
+        }
+    }
+    free(vet_cores);
+    return (index_maior + 1);
 }
 
 void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casas)
@@ -48,29 +119,42 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     Verificar *cima;
     Verificar *esquerda;
     Verificar *atual;
-    baixo = &(mapa[i + 1][j]);
-    cima = &(mapa[i - 1][j]);
-    esquerda = &(mapa[i][j - 1]);
-    direita = &(mapa[i][j + 1]);
+    if (i < (param.num_colunas - 1))
+        baixo = &(mapa[i + 1][j]);
+    if (i > 0)
+        cima = &(mapa[i - 1][j]);
+    if (j > 0)
+        esquerda = &(mapa[i][j - 1]);
+    if (j < (param.num_linhas - 1))
+        direita = &(mapa[i][j + 1]);
     atual = &(mapa[i][j]);
-    if ((j < (param.num_linhas - 1)) && (direita->verificar == 1) && (direita->valor != atual->valor))
+    if ((j < (param.num_linhas - 1)) && (direita->verificar == 1) && (direita->valor != atual->valor) && (atual->camadaExterna == 0))
     {
         direita->valor = atual->valor;
         atual->camadaExterna = 0;
         verificaDireita(mapa, i, (j + 1), param, casas);
     }
-    if ((j < (param.num_linhas - 1)) && (direita->verificar == 0) && (direita->valor == atual->valor))
+    if ((j < (param.num_linhas - 1)) && (direita->verificar == 0) && (direita->valor == atual->valor) && (atual->camadaExterna == 0))
     {
         *casas += 1;
         atual->camadaExterna = 0;
         direita->valor = atual->valor;
         direita->verificar = 1;
+        direita->camadaExterna = 0;
         verificaDireita(mapa, i, (j + 1), param, casas);
     }
-    else if (j < (param.num_linhas - 1) && (direita->verificar == 0) && (direita->valor != atual->valor))
+    if ((j < (param.num_linhas - 1)) && (direita->verificar == 0))
     {
-        atual->camadaExterna = 0;
-        direita->camadaExterna = 1;
+        if ((atual->camadaExterna == 0) && (atual->valor != direita->valor))
+        {
+            direita->camadaExterna = 1;
+            verificaDireita(mapa, i, (j + 1), param, casas);
+        }
+        else if ((atual->camadaExterna == 1) && (atual->valor == direita->valor))
+        {
+            direita->camadaExterna = 1;
+            verificaDireita(mapa, i, (j + 1), param, casas);
+        }
     }
 
     if ((i < (param.num_colunas - 1) && (baixo->verificar == 1) && (baixo->valor != atual->valor)))
@@ -85,11 +169,11 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
         atual->camadaExterna = 0;
         baixo->valor = atual->valor;
         baixo->verificar = 1;
+        baixo->camadaExterna = 0;
         verificaDireita(mapa, (i + 1), j, param, casas);
     }
-    else if (i < (param.num_colunas - 1) && (baixo->verificar == 0) && (baixo->valor != atual->valor))
+    else if (i < (param.num_colunas - 1) && (baixo->verificar == 0))
     {
-        atual->camadaExterna = 0;
         baixo->camadaExterna = 1;
     }
 
@@ -105,11 +189,11 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
         atual->camadaExterna = 0;
         esquerda->valor = atual->valor;
         esquerda->verificar = 1;
+        esquerda->camadaExterna = 0;
         verificaDireita(mapa, i, (j - 1), param, casas);
     }
-    else if ((j > 0) && (esquerda->verificar == 0) && (esquerda->valor != atual->valor))
+    else if ((j > 0) && (esquerda->verificar == 0))
     {
-        atual->camadaExterna = 0;
         esquerda->camadaExterna = 1;
     }
 
@@ -125,11 +209,11 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
         atual->camadaExterna = 0;
         cima->valor = atual->valor;
         cima->verificar = 1;
+        cima->camadaExterna = 0;
         verificaDireita(mapa, (i - 1), j, param, casas);
     }
-    else if ((i > 0) && (cima->verificar == 0) && (cima->valor != atual->valor))
+    else if ((i > 0) && (cima->verificar == 0))
     {
-        atual->camadaExterna = 0;
         cima->camadaExterna = 1;
     }
 }
@@ -224,31 +308,17 @@ int main(int argc, char *argv[])
     mapa[0][0].verificar = 1;
     int num;
     int casas = 1;
-    int count = 0;
+    int count = -1;
     while (casas != 900)
     {
-        // num = rand() % (parametros[2] + 1);
+        system("clear");
         num = retornaNumero(mapa, param);
         fprintf(solu, "a %d ", num);
         mapa[0][0].valor = num;
         verificaDireita(mapa, 0, 0, param, &casas);
-        system("clear");
-        for (int a = 0; a < param.num_linhas; a++)
-        {
-            for (int b = 0; b < param.num_colunas; b++)
-            {
-                if ((mapa[a][b].verificar) == 1)
-                {
-                    printf("%s%2d %s", ANSI_GREEN, mapa[a][b].valor, ANSI_RESET);
-                }
-                else if ((mapa[a][b].camadaExterna) == 1)
-                    printf("%s%2c %s", ANSI_RED, '1', ANSI_RESET);
-                else
-                    printf("%s%2c %s", ANSI_BLUE, '0', ANSI_RESET);
-                // printf("%3d ", mapa[a][b].camadaExterna);
-            }
-            printf("\n");
-        }
+        imprimeMapa(mapa, param);
+        char none;
+        scanf("%c", &none);
         // sleep(1);
         count++;
     }
@@ -257,17 +327,8 @@ int main(int argc, char *argv[])
     fprintf(solu, "%d\n", count);
     printf("\nTotal de passos %d\n", count);
 
-    for (i = 0; i < parametros[0]; i++)
-    {
-        for (j = 0; j < parametros[1]; j++)
-        {
-            if (mapa[i][j].verificar == 1)
-                printf("%3d ", mapa[i][j].valor);
-            else
-                printf("%3d ", mapa[i][j].verificar);
-        }
-        printf("\n");
-    }
+    imprimeMapa(mapa, param);
+
     printf("\n\n%d\n\n", casas);
 
     fclose(arq);
