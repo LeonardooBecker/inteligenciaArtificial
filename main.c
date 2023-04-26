@@ -128,6 +128,10 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     if (j < (param.num_linhas - 1))
         direita = &(mapa[i][j + 1]);
     atual = &(mapa[i][j]);
+
+    /*
+        Backtrack direita
+    */
     if ((j < (param.num_linhas - 1)) && (direita->verificar == 1) && (direita->valor != atual->valor) && (atual->camadaExterna == 0))
     {
         direita->valor = atual->valor;
@@ -150,20 +154,23 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
             direita->camadaExterna = 1;
             verificaDireita(mapa, i, (j + 1), param, casas);
         }
-        else if ((atual->camadaExterna == 1) && (atual->valor == direita->valor))
+        else if ((atual->valor == direita->valor) && (direita->camadaExterna==0))
         {
             direita->camadaExterna = 1;
             verificaDireita(mapa, i, (j + 1), param, casas);
         }
     }
 
-    if ((i < (param.num_colunas - 1) && (baixo->verificar == 1) && (baixo->valor != atual->valor)))
+    /*
+        Backtrack baixo
+    */
+    if ((i < (param.num_colunas - 1) && (baixo->verificar == 1) && (baixo->valor != atual->valor)) && (atual->camadaExterna == 0))
     {
         atual->camadaExterna = 0;
         baixo->valor = atual->valor;
         verificaDireita(mapa, (i + 1), j, param, casas);
     }
-    if ((i < (param.num_colunas - 1) && (baixo->verificar == 0) && (baixo->valor == atual->valor)))
+    if ((i < (param.num_colunas - 1) && (baixo->verificar == 0) && (baixo->valor == atual->valor)) && (atual->camadaExterna == 0))
     {
         *casas += 1;
         atual->camadaExterna = 0;
@@ -174,16 +181,28 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     }
     else if (i < (param.num_colunas - 1) && (baixo->verificar == 0))
     {
-        baixo->camadaExterna = 1;
+        if ((atual->camadaExterna == 0) && (atual->valor != baixo->valor))
+        {
+            baixo->camadaExterna = 1;
+            verificaDireita(mapa, (i + 1), j, param, casas);
+        }
+        else if ((baixo->valor == atual->valor) && (baixo->camadaExterna == 0))
+        {
+            baixo->camadaExterna = 1;
+            verificaDireita(mapa, (i + 1), j, param, casas);
+        }
     }
 
-    if ((j > 0) && (esquerda->verificar == 1) && (esquerda->valor != atual->valor))
+    /*
+        Backtrack esquerda
+    */
+    if ((j > 0) && (esquerda->verificar == 1) && (esquerda->valor != atual->valor) && (atual->camadaExterna == 0))
     {
         atual->camadaExterna = 0;
         esquerda->valor = atual->valor;
         verificaDireita(mapa, i, (j - 1), param, casas);
     }
-    if ((j > 0) && (esquerda->verificar == 0) && (esquerda->valor == atual->valor))
+    if ((j > 0) && (esquerda->verificar == 0) && (esquerda->valor == atual->valor) && (atual->camadaExterna == 0))
     {
         *casas += 1;
         atual->camadaExterna = 0;
@@ -194,16 +213,28 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     }
     else if ((j > 0) && (esquerda->verificar == 0))
     {
-        esquerda->camadaExterna = 1;
+        if ((atual->camadaExterna == 0) && (atual->valor != esquerda->valor) && (esquerda->verificar == 0))
+        {
+            esquerda->camadaExterna = 1;
+            verificaDireita(mapa, i, (j - 1), param, casas);
+        }
+        else if ((atual->valor == esquerda->valor) && (esquerda->camadaExterna == 0))
+        {
+            esquerda->camadaExterna = 1;
+            verificaDireita(mapa, i, (j - 1), param, casas);
+        }
     }
 
-    if ((i > 0) && (cima->verificar == 1) && (cima->valor != atual->valor))
+    /*
+        Backtrack cima
+    */
+    if ((i > 0) && (cima->verificar == 1) && (cima->valor != atual->valor) && (atual->camadaExterna == 0))
     {
         atual->camadaExterna = 0;
         cima->valor = atual->valor;
         verificaDireita(mapa, (i - 1), j, param, casas);
     }
-    if ((i > 0) && (cima->verificar == 0) && (cima->valor == atual->valor))
+    if ((i > 0) && (cima->verificar == 0) && (cima->valor == atual->valor) && (atual->camadaExterna == 0))
     {
         *casas += 1;
         atual->camadaExterna = 0;
@@ -214,7 +245,16 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     }
     else if ((i > 0) && (cima->verificar == 0))
     {
-        cima->camadaExterna = 1;
+        if ((atual->camadaExterna == 0) && (atual->valor != cima->valor))
+        {
+            cima->camadaExterna = 1;
+            verificaDireita(mapa, (i - 1), j, param, casas);
+        }
+        else if ((atual->valor == cima->valor) && (cima->camadaExterna == 0))
+        {
+            cima->camadaExterna = 1;
+            verificaDireita(mapa, (i - 1), j, param, casas);
+        }
     }
 }
 
