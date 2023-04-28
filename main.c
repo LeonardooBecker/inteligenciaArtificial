@@ -85,7 +85,7 @@ void imprimeMapa(Verificar **mapa, Parametros param)
     }
 }
 
-int retornaNumero(Verificar **mapa, Parametros param)
+int retornaNumero(Verificar **mapa, Parametros param, int **matValoracao)
 {
     int *vet_cores = malloc(param.num_cores * sizeof(int));
     for (int i = 0; i < (param.num_cores); i++)
@@ -96,7 +96,7 @@ int retornaNumero(Verificar **mapa, Parametros param)
         {
             if ((mapa[a][b].camadaExterna) == 1)
             {
-                vet_cores[(mapa[a][b].valor - 1)] += 1;
+                vet_cores[(mapa[a][b].valor - 1)] += matValoracao[a][b];
             }
         }
     }
@@ -154,7 +154,7 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
             direita->camadaExterna = 1;
             verificaDireita(mapa, i, (j + 1), param, casas);
         }
-        else if ((atual->valor == direita->valor) && (direita->camadaExterna==0))
+        else if ((atual->valor == direita->valor) && (direita->camadaExterna == 0))
         {
             direita->camadaExterna = 1;
             verificaDireita(mapa, i, (j + 1), param, casas);
@@ -345,6 +345,29 @@ int main(int argc, char *argv[])
     param.num_colunas = parametros[1];
     param.num_cores = parametros[2];
 
+    for (i = 0; i < (param.num_linhas / 2) + 1; i++)
+    {
+        for (j = 0; j < (param.num_colunas / 2) + 1; j++)
+        {
+            matrizValoracao[i][j] = 0;
+            matrizValoracao[i][j] = i * j+1;
+            matrizValoracao[(param.num_linhas-i-1)][(param.num_colunas-j-1)]=i*j+1;
+            matrizValoracao[(param.num_linhas-i-1)][j]=i*j+1;
+            matrizValoracao[i][(param.num_colunas-j-1)]=i*j+1;
+        }
+        printf("\n");
+    }
+    // for (i = 0; i < param.num_linhas; i++)
+    // {
+    //     for (j = 0; j < param.num_colunas; j++)
+    //     {
+    //         printf("%3d ", matrizValoracao[i][j]);
+    //     }
+    //     printf("\n");
+    // }
+    // char ao;
+    // scanf("%c", &ao);
+
     mapa[0][0].verificar = 1;
     int num;
     int casas = 1;
@@ -352,7 +375,7 @@ int main(int argc, char *argv[])
     while (casas != 900)
     {
         system("clear");
-        num = retornaNumero(mapa, param);
+        num = retornaNumero(mapa, param, matrizValoracao);
         fprintf(solu, "a %d ", num);
         mapa[0][0].valor = num;
         verificaDireita(mapa, 0, 0, param, &casas);
