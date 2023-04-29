@@ -33,6 +33,22 @@ typedef struct
     int num_colunas;
 } Parametros;
 
+void setaValoracao(int **matrizValoracao, Parametros param)
+{
+    int i, j;
+    for (i = 0; i < (param.num_linhas / 2) + 1; i++)
+    {
+        for (j = 0; j < (param.num_colunas / 2) + 1; j++)
+        {
+            int valor = (param.num_colunas*param.num_linhas)/(abs(i-j)+1)+1;
+            matrizValoracao[i][j] = valor;
+            matrizValoracao[(param.num_linhas - i - 1)][(param.num_colunas - j - 1)] = valor;
+            matrizValoracao[(param.num_linhas - i - 1)][j] = valor;
+            matrizValoracao[i][(param.num_colunas - j - 1)] = valor;
+        }
+    }
+}
+
 void imprimeMapa(Verificar **mapa, Parametros param)
 {
     for (int a = 0; a < param.num_linhas; a++)
@@ -112,7 +128,7 @@ int retornaNumero(Verificar **mapa, Parametros param, int **matValoracao)
     return (index_maior + 1);
 }
 
-void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casas)
+void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casas, int **matValoracao)
 {
     Verificar *direita;
     Verificar *baixo;
@@ -136,7 +152,7 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     {
         direita->valor = atual->valor;
         atual->camadaExterna = 0;
-        verificaDireita(mapa, i, (j + 1), param, casas);
+        verificaDireita(mapa, i, (j + 1), param, casas, matValoracao);
     }
     if ((j < (param.num_linhas - 1)) && (direita->verificar == 0) && (direita->valor == atual->valor) && (atual->camadaExterna == 0))
     {
@@ -145,19 +161,23 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
         direita->valor = atual->valor;
         direita->verificar = 1;
         direita->camadaExterna = 0;
-        verificaDireita(mapa, i, (j + 1), param, casas);
+        verificaDireita(mapa, i, (j + 1), param, casas, matValoracao);
     }
     if ((j < (param.num_linhas - 1)) && (direita->verificar == 0))
     {
         if ((atual->camadaExterna == 0) && (atual->valor != direita->valor))
         {
             direita->camadaExterna = 1;
-            verificaDireita(mapa, i, (j + 1), param, casas);
+            verificaDireita(mapa, i, (j + 1), param, casas, matValoracao);
         }
         else if ((atual->valor == direita->valor) && (direita->camadaExterna == 0))
         {
             direita->camadaExterna = 1;
-            verificaDireita(mapa, i, (j + 1), param, casas);
+            if(matValoracao[i][j]>matValoracao[i][j-1])
+                matValoracao[i][j]=matValoracao[i][j]*3;
+            else
+                matValoracao[i][j] = matValoracao[i][j-1]*3;
+            verificaDireita(mapa, i, (j + 1), param, casas, matValoracao);
         }
     }
 
@@ -168,7 +188,7 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     {
         atual->camadaExterna = 0;
         baixo->valor = atual->valor;
-        verificaDireita(mapa, (i + 1), j, param, casas);
+        verificaDireita(mapa, (i + 1), j, param, casas, matValoracao);
     }
     if ((i < (param.num_colunas - 1) && (baixo->verificar == 0) && (baixo->valor == atual->valor)) && (atual->camadaExterna == 0))
     {
@@ -177,19 +197,23 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
         baixo->valor = atual->valor;
         baixo->verificar = 1;
         baixo->camadaExterna = 0;
-        verificaDireita(mapa, (i + 1), j, param, casas);
+        verificaDireita(mapa, (i + 1), j, param, casas, matValoracao);
     }
     else if (i < (param.num_colunas - 1) && (baixo->verificar == 0))
     {
         if ((atual->camadaExterna == 0) && (atual->valor != baixo->valor))
         {
             baixo->camadaExterna = 1;
-            verificaDireita(mapa, (i + 1), j, param, casas);
+            verificaDireita(mapa, (i + 1), j, param, casas, matValoracao);
         }
-        else if ((baixo->valor == atual->valor) && (baixo->camadaExterna == 0))
+        else if ((atual->valor == baixo->valor) && (baixo->camadaExterna == 0))
         {
             baixo->camadaExterna = 1;
-            verificaDireita(mapa, (i + 1), j, param, casas);
+            if(matValoracao[i][j]>matValoracao[i+1][j])
+                matValoracao[i][j]=matValoracao[i][j]*3;
+            else
+                matValoracao[i][j] = matValoracao[i+1][j]*3;
+            verificaDireita(mapa, (i + 1), j, param, casas, matValoracao);
         }
     }
 
@@ -200,7 +224,7 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     {
         atual->camadaExterna = 0;
         esquerda->valor = atual->valor;
-        verificaDireita(mapa, i, (j - 1), param, casas);
+        verificaDireita(mapa, i, (j - 1), param, casas, matValoracao);
     }
     if ((j > 0) && (esquerda->verificar == 0) && (esquerda->valor == atual->valor) && (atual->camadaExterna == 0))
     {
@@ -209,19 +233,23 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
         esquerda->valor = atual->valor;
         esquerda->verificar = 1;
         esquerda->camadaExterna = 0;
-        verificaDireita(mapa, i, (j - 1), param, casas);
+        verificaDireita(mapa, i, (j - 1), param, casas, matValoracao);
     }
     else if ((j > 0) && (esquerda->verificar == 0))
     {
         if ((atual->camadaExterna == 0) && (atual->valor != esquerda->valor) && (esquerda->verificar == 0))
         {
             esquerda->camadaExterna = 1;
-            verificaDireita(mapa, i, (j - 1), param, casas);
+            verificaDireita(mapa, i, (j - 1), param, casas, matValoracao);
         }
         else if ((atual->valor == esquerda->valor) && (esquerda->camadaExterna == 0))
         {
             esquerda->camadaExterna = 1;
-            verificaDireita(mapa, i, (j - 1), param, casas);
+            if(matValoracao[i][j]>matValoracao[i][j+1])
+                matValoracao[i][j] = matValoracao[i][j]*3;
+            else
+                matValoracao[i][j] = matValoracao[i][j+1]*3;
+            verificaDireita(mapa, i, (j - 1), param, casas, matValoracao);
         }
     }
 
@@ -232,7 +260,7 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     {
         atual->camadaExterna = 0;
         cima->valor = atual->valor;
-        verificaDireita(mapa, (i - 1), j, param, casas);
+        verificaDireita(mapa, (i - 1), j, param, casas, matValoracao);
     }
     if ((i > 0) && (cima->verificar == 0) && (cima->valor == atual->valor) && (atual->camadaExterna == 0))
     {
@@ -241,19 +269,23 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
         cima->valor = atual->valor;
         cima->verificar = 1;
         cima->camadaExterna = 0;
-        verificaDireita(mapa, (i - 1), j, param, casas);
+        verificaDireita(mapa, (i - 1), j, param, casas, matValoracao);
     }
     else if ((i > 0) && (cima->verificar == 0))
     {
         if ((atual->camadaExterna == 0) && (atual->valor != cima->valor))
         {
             cima->camadaExterna = 1;
-            verificaDireita(mapa, (i - 1), j, param, casas);
+            verificaDireita(mapa, (i - 1), j, param, casas, matValoracao);
         }
         else if ((atual->valor == cima->valor) && (cima->camadaExterna == 0))
         {
             cima->camadaExterna = 1;
-            verificaDireita(mapa, (i - 1), j, param, casas);
+            if(matValoracao[i][j]>matValoracao[i-1][j])
+                matValoracao[i][j] = matValoracao[i][j]*3;
+            else
+                matValoracao[i][j] = matValoracao[i-1][j]*3;
+            verificaDireita(mapa, (i - 1), j, param, casas, matValoracao);
         }
     }
 }
@@ -268,12 +300,12 @@ int main(int argc, char *argv[])
     int parametros[3];
     int i = 0;
     int j = 0;
-    // int **mapa;
     int **matrizValoracao;
 
-    srand(time(NULL));
-
     Verificar **mapa;
+    int **guardaMapa;
+
+    srand(time(NULL));
 
     arq = fopen(nome_arquivo, "r");
     if (arq == NULL)
@@ -318,6 +350,9 @@ int main(int argc, char *argv[])
                 matrizValoracao = (int **)malloc(parametros[0] * sizeof(int *));
                 for (i = 0; i < parametros[0]; i++)
                     matrizValoracao[i] = (int *)malloc(parametros[1] * sizeof(int));
+                guardaMapa = (int **)malloc(parametros[0] * sizeof(int *));
+                for (i = 0; i < parametros[0]; i++)
+                    guardaMapa[i] = (int *)malloc(parametros[1] * sizeof(int));
             }
             else
             {
@@ -326,6 +361,7 @@ int main(int argc, char *argv[])
                 while ((ptr != NULL) && (ptr[0] != '\n'))
                 {
                     mapa[j][i].valor = atoi(ptr);
+                    guardaMapa[i][j] = atoi(ptr);
                     mapa[i][j].verificar = 0;
                     mapa[i][j].camadaExterna = 0;
                     i++;
@@ -345,54 +381,195 @@ int main(int argc, char *argv[])
     param.num_colunas = parametros[1];
     param.num_cores = parametros[2];
 
-    for (i = 0; i < (param.num_linhas / 2) + 1; i++)
+    int *frequencias = (int *)calloc(param.num_cores, sizeof(int));
+    for (i = 0; i < param.num_linhas; i++)
+        for (j = 0; j < param.num_colunas; j++)
+            frequencias[(mapa[i][j].valor - 1)] += 1;
+    for (i = 0; i < param.num_cores; i++)
+        printf("%d ", frequencias[i]);
+    printf("\n");
+
+    setaValoracao(matrizValoracao, param);
+
+    for (i = 0; i < param.num_linhas; i++)
     {
-        for (j = 0; j < (param.num_colunas / 2) + 1; j++)
+        for (j = 0; j < param.num_colunas; j++)
         {
-            matrizValoracao[i][j] = 0;
-            matrizValoracao[i][j] = i * j+1;
-            matrizValoracao[(param.num_linhas-i-1)][(param.num_colunas-j-1)]=i*j+1;
-            matrizValoracao[(param.num_linhas-i-1)][j]=i*j+1;
-            matrizValoracao[i][(param.num_colunas-j-1)]=i*j+1;
+            printf("%4d ", matrizValoracao[i][j]);
         }
         printf("\n");
     }
-    // for (i = 0; i < param.num_linhas; i++)
-    // {
-    //     for (j = 0; j < param.num_colunas; j++)
-    //     {
-    //         printf("%3d ", matrizValoracao[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-    // char ao;
-    // scanf("%c", &ao);
+    char ao;
+    scanf("%c", &ao);
+
+    int **melhorSolucao;
+    melhorSolucao = (int **)calloc(param.num_linhas * param.num_colunas, sizeof(int *));
+    for (i = 0; i < (param.num_linhas * param.num_colunas); i++)
+        melhorSolucao[i] = (int *)calloc(2, sizeof(int));
+
+    int **solucaoAtual;
+    solucaoAtual = (int **)calloc(param.num_linhas * param.num_colunas, sizeof(int *));
+    for (i = 0; i < (param.num_linhas * param.num_colunas); i++)
+        solucaoAtual[i] = (int *)calloc(2, sizeof(int));
 
     mapa[0][0].verificar = 1;
     int num;
     int casas = 1;
     int count = -1;
-    while (casas != 900)
+    int passosMS = 0;
+    char none;
+    while (casas != (param.num_linhas * param.num_colunas))
     {
         system("clear");
         num = retornaNumero(mapa, param, matrizValoracao);
-        fprintf(solu, "a %d ", num);
         mapa[0][0].valor = num;
-        verificaDireita(mapa, 0, 0, param, &casas);
+        verificaDireita(mapa, 0, 0, param, &casas, matrizValoracao);
         imprimeMapa(mapa, param);
-        char none;
-        scanf("%c", &none);
-        // sleep(1);
+        usleep(50000);
         count++;
+        solucaoAtual[count][0] = 0;
+        solucaoAtual[count][1] = num;
+    }
+    if ((count < passosMS) || (passosMS == 0))
+    {
+        passosMS = count;
+        for (i = 0; i <= count; i++)
+        {
+            melhorSolucao[i][0] = 0;
+            melhorSolucao[i][1] = solucaoAtual[i][1];
+        }
+    }
+    // inf esq
+    setaValoracao(matrizValoracao, param);
+    for (i = 0; i < param.num_linhas; i++)
+    {
+        for (j = 0; j < param.num_colunas; j++)
+        {
+            mapa[i][j].valor = guardaMapa[i][j];
+            mapa[i][j].camadaExterna = 0;
+            mapa[i][j].verificar = 0;
+        }
+    }
+    mapa[(param.num_linhas - 1)][0].verificar = 1;
+    casas = 1;
+    count = -1;
+    while (casas != (param.num_linhas * param.num_colunas))
+    {
+        system("clear");
+        num = retornaNumero(mapa, param, matrizValoracao);
+        mapa[(param.num_linhas - 1)][0].valor = num;
+        verificaDireita(mapa, (param.num_linhas - 1), 0, param, &casas, matrizValoracao);
+        imprimeMapa(mapa, param);
+        usleep(50000);
+        count++;
+        solucaoAtual[count][0] = 0;
+        solucaoAtual[count][1] = num;
+    }
+    if ((count < passosMS) || (passosMS == 0))
+    {
+        passosMS = count;
+        for (i = 0; i <= count; i++)
+        {
+            melhorSolucao[i][0] = 1;
+            melhorSolucao[i][1] = solucaoAtual[i][1];
+        }
+    }
+
+    // inf dir
+    setaValoracao(matrizValoracao, param);
+    for (i = 0; i < param.num_linhas; i++)
+    {
+        for (j = 0; j < param.num_colunas; j++)
+        {
+            mapa[i][j].valor = guardaMapa[i][j];
+            mapa[i][j].camadaExterna = 0;
+            mapa[i][j].verificar = 0;
+        }
+    }
+    mapa[(param.num_linhas - 1)][(param.num_colunas - 1)].verificar = 1;
+    casas = 1;
+    count = -1;
+    while (casas != (param.num_linhas * param.num_colunas))
+    {
+        system("clear");
+        num = retornaNumero(mapa, param, matrizValoracao);
+        mapa[(param.num_linhas - 1)][(param.num_colunas - 1)].valor = num;
+        verificaDireita(mapa, (param.num_linhas - 1), (param.num_colunas - 1), param, &casas, matrizValoracao);
+        imprimeMapa(mapa, param);
+        usleep(50000);
+        count++;
+        solucaoAtual[count][0] = 0;
+        solucaoAtual[count][1] = num;
+    }
+    if ((count < passosMS) || (passosMS == 0))
+    {
+        passosMS = count;
+        for (i = 0; i <= count; i++)
+        {
+            melhorSolucao[i][0] = 2;
+            melhorSolucao[i][1] = solucaoAtual[i][1];
+        }
+    }
+    // sup dir
+    setaValoracao(matrizValoracao, param);
+    for (i = 0; i < param.num_linhas; i++)
+    {
+        for (j = 0; j < param.num_colunas; j++)
+        {
+            mapa[i][j].valor = guardaMapa[i][j];
+            mapa[i][j].camadaExterna = 0;
+            mapa[i][j].verificar = 0;
+        }
+    }
+    mapa[0][(param.num_colunas - 1)].verificar = 1;
+    casas = 1;
+    count = -1;
+    while (casas != (param.num_linhas * param.num_colunas))
+    {
+        system("clear");
+        num = retornaNumero(mapa, param, matrizValoracao);
+        mapa[0][(param.num_colunas - 1)].valor = num;
+        verificaDireita(mapa, 0, (param.num_colunas - 1), param, &casas, matrizValoracao);
+        imprimeMapa(mapa, param);
+        usleep(50000);
+        count++;
+        solucaoAtual[count][0] = 0;
+        solucaoAtual[count][1] = num;
+    }
+    if ((count < passosMS) || (passosMS == 0))
+    {
+        passosMS = count;
+        for (i = 0; i <= count; i++)
+        {
+            melhorSolucao[i][0] = 3;
+            melhorSolucao[i][1] = solucaoAtual[i][1];
+        }
+    }
+
+    for (i = 0; i <= passosMS; i++)
+    {
+        switch (melhorSolucao[i][0])
+        {
+        case 0:
+            fprintf(solu, "a %d ", melhorSolucao[i][1]);
+            break;
+        case 1:
+            fprintf(solu, "b %d ", melhorSolucao[i][1]);
+            break;
+        case 2:
+            fprintf(solu, "c %d ", melhorSolucao[i][1]);
+            break;
+        case 3:
+            fprintf(solu, "d %d ", melhorSolucao[i][1]);
+            break;
+        }
     }
 
     fseek(solu, 0, SEEK_SET);
-    fprintf(solu, "%d\n", count);
-    printf("\nTotal de passos %d\n", count);
+    fprintf(solu, "%d\n", passosMS);
+    printf("\nTotal de passos %d\n", passosMS);
 
     imprimeMapa(mapa, param);
-
-    printf("\n\n%d\n\n", casas);
 
     fclose(arq);
     fclose(solu);
