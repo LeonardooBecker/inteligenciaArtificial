@@ -1,0 +1,88 @@
+void retornaPilha(Verificar **mapa, Parametros param, pilha_t *p)
+{
+    int *vet_quantidades = calloc(param.num_cores, sizeof(int));
+
+    for (int a = 0; a < param.num_linhas; a++)
+    {
+        for (int b = 0; b < param.num_colunas; b++)
+        {
+            if ((mapa[a][b].camadaExterna) == 1)
+            {
+                vet_quantidades[(mapa[a][b].valor - 1)] += 1;
+            }
+        }
+    }
+
+    for (int i = 0; i < param.num_cores; i++)
+        if (vet_quantidades[i] != 0)
+            push(p, (i + 1));
+
+    free(vet_quantidades);
+}
+
+// void nsei(Verificar **mapa, int i, int j, Parametros param, int *casas, int **matValoracao, int count)
+// {
+//     pilha_t *p;
+//     int num = 0;
+//     char ao;
+//     int sum = 0;
+
+//     Verificar **mapaAqui;
+//     Verificar **mapaCopia;
+
+//     mapaAqui = (Verificar **)malloc(param.num_linhas * sizeof(Verificar *));
+//     for (i = 0; i < param.num_linhas; i++)
+//         mapaAqui[i] = (Verificar *)malloc(param.num_colunas * sizeof(Verificar));
+
+//     mapaCopia = (Verificar **)malloc(param.num_linhas * sizeof(Verificar *));
+//     for (i = 0; i < param.num_linhas; i++)
+//         mapaCopia[i] = (Verificar *)malloc(param.num_colunas * sizeof(Verificar));
+
+//     for (i = 0; i < param.num_linhas; i++)
+//     {
+//         for (j = 0; j < param.num_colunas; j++)
+//         {
+//             mapaAqui[i][j].valor = mapa[i][j].valor;
+//             mapaAqui[i][j].camadaExterna = mapa[i][j].camadaExterna;
+//             mapaAqui[i][j].verificar = mapa[i][j].verificar;
+//             mapaCopia[i][j].valor = mapa[i][j].valor;
+//             mapaCopia[i][j].camadaExterna = mapa[i][j].camadaExterna;
+//             mapaCopia[i][j].verificar = mapa[i][j].verificar;
+//         }
+//     }
+
+//     p = pilha_cria(param.num_colunas * param.num_linhas * param.num_cores);
+//     verificaDireita(mapaAqui, 0, 0, param, casas, matValoracao);
+//     retornaPilha(mapaAqui, param, p);
+
+//     while (!pilha_vazia(p))
+//     {
+//         for (i = 0; i < param.num_linhas; i++)
+//         {
+//             for (j = 0; j < param.num_colunas; j++)
+//             {
+//                 mapaAqui[i][j].valor = mapaCopia[i][j].valor;
+//                 mapaAqui[i][j].camadaExterna = mapaCopia[i][j].camadaExterna;
+//                 mapaAqui[i][j].verificar = mapaCopia[i][j].verificar;
+//             }
+//         }
+
+//         system("clear");
+//         imprimeMapa(mapaCopia, param);
+//         pilha_imprime(p);
+//         printf("\ncount: %d\n",count);
+//         num = pop(p);
+//         mapaAqui[0][0].valor = num;
+//         verificaDireita(mapaAqui, 0, 0, param, casas, matValoracao);
+//         int valor = 1;
+//         usleep(50000);
+//         scanf("%d", &valor);
+//         if ((valor == 1))
+//         {
+//             count++;
+//             nsei(mapaAqui, 0, 0, param, casas, matValoracao, count);
+//         }
+//         else
+//             return;
+//     }
+// }

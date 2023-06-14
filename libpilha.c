@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "libpilha.h"
+
 pilha_t *pilha_cria(int nelem)
 {
     pilha_t *pilha;
     if ((pilha = malloc(sizeof(pilha_t))))
     {
-        if ((pilha->elems = malloc(sizeof(int) * nelem)))
+        if ((pilha->elems = malloc(sizeof(elemPilha) * nelem)))
         {
             pilha->topo = -1;
             pilha->nelem = nelem;
@@ -17,7 +18,7 @@ pilha_t *pilha_cria(int nelem)
     return NULL;
 }
 
-int push(pilha_t *pilha, int elem)
+int push(pilha_t *pilha, elemPilha elem)
 {
     if (pilha->topo == ((pilha->nelem) - 1))
         return -1;
@@ -26,50 +27,25 @@ int push(pilha_t *pilha, int elem)
     else
     {
         (pilha->topo)++;
-        pilha->elems[pilha->topo] = elem;
+        pilha->elems[pilha->topo]= elem;
     }
     return (pilha->topo);
 }
 
-int pop(pilha_t *pilha)
+elemPilha pop(pilha_t *pilha)
 {
+    elemPilha elem;
+    elem.valor = -1;
+    elem.visitado = -1;
     /* Se a pilha estiver vazia, retorna 0 */
     if (pilha_vazia(pilha))
-        return 0;
+        return elem;
     /* Caso contrario, retorna o topo da pilha, ou seja, o ultimo elemento a ser inserido, segundo politica LIFO */
     else
     {
         (pilha->topo)--;
         return (pilha->elems[(pilha->topo) + 1]);
     }
-}
-
-int pertence_pilha(pilha_t *pilha, int elem)
-{
-    int i;
-    /* Se a pilha estiver vazia, retorna 0 */
-    if (pilha_vazia(pilha))
-        return 0;
-    /* Caso contrario, retorna o topo da pilha, ou seja, o ultimo elemento a ser inserido, segundo politica LIFO */
-    else
-    {
-        if (!(pilha_vazia(pilha)))
-        {
-            for (i = 0; i <=(pilha->topo); i++)
-                if(pilha->elems[i]==elem)
-                    return 1;
-        }
-        return 0;
-    }
-}
-
-int pilha_topo(pilha_t *pilha)
-{
-    /* Se a pilha estiver vazia retorna 0 */
-    if (pilha_vazia(pilha))
-        return 0;
-    else
-        return (pilha->elems[(pilha->topo)]);
 }
 
 int pilha_tamanho(pilha_t *pilha)
@@ -83,6 +59,18 @@ int pilha_vazia(pilha_t *pilha)
         return 1;
     else
         return 0;
+}
+
+int confere_pilha(pilha_t *pilha)
+{
+    int i;
+    if (!(pilha_vazia(pilha)))
+    {
+        for (i = 0; i <= (pilha->topo); i++)
+            if(pilha->elems[i].visitado==0)
+                return 1;
+    }
+    return 0;
 }
 
 pilha_t *pilha_destroi(pilha_t *pilha)
@@ -100,7 +88,7 @@ void pilha_imprime(pilha_t *pilha)
     if (!(pilha_vazia(pilha)))
     {
         for (i = 0; i < (pilha->topo); i++)
-            printf("%d ", pilha->elems[i]);
-        printf("%d", pilha->elems[pilha->topo]);
+            printf("(%d|%d) ", pilha->elems[i].valor, pilha->elems[i].visitado);
+        printf("(%d|%d) ", pilha->elems[pilha->topo].valor, pilha->elems[pilha->topo].visitado);
     }
 }

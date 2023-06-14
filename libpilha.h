@@ -12,8 +12,15 @@
 #ifndef _LIBpilha_t_H
 #define _LIBpilha_t_H
 
+typedef struct
+{
+    int valor;
+    int visitado;
+
+} elemPilha;
+
 typedef struct {
-    int* elems;   /* espaco armazenamento dos elementos tipo int */
+    elemPilha* elems;   /* espaco armazenamento dos elementos tipo int */
     int nelem;    /* qtde maxima de elementos                    */
     int topo;     /* indice para elemento do topo da pilha       */
 } pilha_t;
@@ -28,13 +35,13 @@ pilha_t* pilha_cria (int nelem);
  * Insere elem na pilha (politica LIFO). Retorna o número de elementos na pilha
  * em caso de sucesso e -1 em caso de pilha cheia
 */
-int push (pilha_t* pilha, int elem);
+int push (pilha_t* pilha, elemPilha elem);
 
 /*
  * Remove (politica LIFO) e retorna um elemento da pilha.
  * Em caso de pilha vazia retorna 0
 */
-int pop (pilha_t* pilha);
+elemPilha pop (pilha_t* pilha);
 
 /* Similar ao Pop, mas retorna sem remover */
 int pilha_topo (pilha_t* pilha);
