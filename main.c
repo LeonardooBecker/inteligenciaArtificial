@@ -19,7 +19,7 @@
 
 #define TAM_LINHA 1024
 
-#define QNT_TESTE 5
+#define QNT_TESTE 2
 
 typedef struct
 {
@@ -38,12 +38,31 @@ typedef struct
 
 void setaValoracao(int **matrizValoracao, Parametros param)
 {
+    // int i, j;
+    // for (i = 0; i < (param.num_linhas / 2) + 1; i++)
+    // {
+    //     for (j = 0; j < (param.num_colunas / 2) + 1; j++)
+    //     {
+    //         int valor = (param.num_colunas * param.num_linhas) / ((abs(i - j) * abs(i - j) * abs(i - j)) + 1) + 1;
+    //         if (i == j)
+    //             valor *= 2;
+    //         // int valor = (param.num_colunas * param.num_linhas) / ((abs((param.num_linhas / 2 +1) - i)) * abs(((param.num_colunas / 2 +1 ) - j)) ) *(i+1)*(j+1);
+    //         // valor=valor/10+1;
+    //         matrizValoracao[i][j] = valor;
+    //         matrizValoracao[(param.num_linhas - i - 1)][(param.num_colunas - j - 1)] = valor;
+    //         matrizValoracao[(param.num_linhas - i - 1)][j] = valor;
+    //         matrizValoracao[i][(param.num_colunas - j - 1)] = valor;
+    //     }
+    // }
+
     int i, j;
     for (i = 0; i < (param.num_linhas / 2) + 1; i++)
     {
         for (j = 0; j < (param.num_colunas / 2) + 1; j++)
         {
-            int valor = (param.num_colunas * param.num_linhas) / (abs(i - j) * abs(i - j) + 1) + 1;
+            int valor = (param.num_colunas * param.num_linhas*10) / (1 + abs(param.num_colunas - j) + abs(param.num_linhas - i) + abs(i - j)*abs(i - j)*abs(i - j)*abs(i - j)) + 1;
+            if (i == j)
+                valor *= 3;
             // int valor = (param.num_colunas * param.num_linhas) / ((abs((param.num_linhas / 2 +1) - i)) * abs(((param.num_colunas / 2 +1 ) - j)) ) *(i+1)*(j+1);
             // valor=valor/10+1;
             matrizValoracao[i][j] = valor;
@@ -310,7 +329,7 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     }
 }
 
-void progride(Verificar **mapa, int **matrizValoracao, Parametros param, int count, int *vetorSolucao, int *vetorAtual)
+void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Parametros param, int count, int *vetorSolucao, int *vetorAtual)
 {
     char a;
     int totalCasas = 0;
@@ -329,7 +348,7 @@ void progride(Verificar **mapa, int **matrizValoracao, Parametros param, int cou
     for (i = 0; i < param.num_cores; i++)
         opcoes[i] = 0;
 
-    verificaDireita(mapa, 0, 0, param, &casas, matrizValoracao);
+    verificaDireita(mapa, row, column, param, &casas, matrizValoracao);
 
     retornaVetor(mapa, param, opcoes);
 
@@ -362,7 +381,7 @@ void progride(Verificar **mapa, int **matrizValoracao, Parametros param, int cou
             }
         }
 
-        mapaAqui[0][0].valor = numero;
+        mapaAqui[row][column].valor = numero;
 
         // system("clear");
         // printf("%d\n", count);
@@ -374,7 +393,7 @@ void progride(Verificar **mapa, int **matrizValoracao, Parametros param, int cou
 
         totalCasas = 0;
 
-        verificaDireita(mapaAqui, 0, 0, param, &casas, matrizValoracao);
+        verificaDireita(mapaAqui, row, column, param, &casas, matrizValoracao);
         setaValoracao(matrizValoracao, param);
 
         // quantidades de casas preenchidas no mapa
@@ -396,9 +415,7 @@ void progride(Verificar **mapa, int **matrizValoracao, Parametros param, int cou
             {
                 if (mapaAqui[i][j].verificar == 1)
                 {
-                    // printf("(%d,%d) ", i, j);
                     total += matrizValoracao[i][j];
-                    // system("clear");
                 }
             }
         }
@@ -419,13 +436,13 @@ void progride(Verificar **mapa, int **matrizValoracao, Parametros param, int cou
             if (vetorSolucao[0] != 0)
                 vetorSolucao[0] = 0;
 
-            for (i = 1; i <= QNT_TESTE; i++)
+            for (i = 1; i < QNT_TESTE; i++)
             {
                 if (vetorSolucao[i] == 0)
                     qntZeros++;
             }
 
-            if (qntZeros > vetorSolucao[0])
+            if (qntZeros >= vetorSolucao[0])
             {
                 vetorSolucao[0] = qntZeros;
                 for (i = 1; i <= (QNT_TESTE + 1); i++)
@@ -451,7 +468,7 @@ void progride(Verificar **mapa, int **matrizValoracao, Parametros param, int cou
 
         if ((count != QNT_TESTE) && (totalCasas < param.num_colunas * param.num_linhas))
         {
-            progride(mapaAqui, matrizValoracao, param, (count + 1), vetorSolucao, vetorAtual);
+            progride(mapaAqui, row, column, matrizValoracao, param, (count + 1), vetorSolucao, vetorAtual);
         }
         else
         {
@@ -586,7 +603,6 @@ int main(int argc, char *argv[])
     for (i = 0; i < (param.num_linhas * param.num_colunas); i++)
         solucaoAtual[i] = (int *)calloc(2, sizeof(int));
 
-    mapa[0][0].verificar = 1;
     int num;
     int casas = 1;
     int count = 0;
@@ -599,235 +615,108 @@ int main(int argc, char *argv[])
     int *vetorAtual;
     vetorAtual = (int *)calloc((QNT_TESTE + 2), sizeof(int));
 
-    int totalCasas = 0;
-    int counter = 0;
-    while (1)
+    int matrizCantos[2][2];
+    matrizCantos[0][0] = 0;
+    matrizCantos[0][1] = param.num_colunas - 1;
+    matrizCantos[1][0] = 0;
+    matrizCantos[1][1] = param.num_linhas - 1;
+
+    int row;
+    int column;
+    int iLinha;
+    int jColuna;
+    int totalCasas;
+    int counter;
+    passosMS = 0;
+    int letraAtual = 0;
+    system("clear");
+    for (iLinha = 0; iLinha < 2; iLinha++)
     {
-        totalCasas = 0;
-        count = 0;
-
-        for (i = 0; i < QNT_TESTE + 2; i++)
+        for (jColuna = 0; jColuna < 2; jColuna++)
         {
-            vetorSolucao[i] = 0;
-            vetorAtual[i] = 0;
-        }
 
-        progride(mapa, matrizValoracao, param, count, vetorSolucao, vetorAtual);
-        // system("clear");
+            printf("processando....\n");
+            row = matrizCantos[iLinha][iLinha];
+            column = matrizCantos[iLinha][jColuna];
+            totalCasas = 0;
+            counter = 0;
 
-        // for (i = 0; i < QNT_TESTE + 2; i++)
-        //     printf("%d ", vetorSolucao[i]);
-
-        // scanf("%c", &ao);
-        for (i = 1; i < QNT_TESTE + 2; i++)
-        {
-            if(vetorSolucao[i]==0)
-                break;
-
-            mapa[0][0].valor = vetorSolucao[i];
-            verificaDireita(mapa, 0, 0, param, &casas, matrizValoracao);
-            system("clear");
-            imprimeMapa(mapa, param);
-            usleep(50000);
-            counter++;
-            // scanf("%c", &ao);
-        }
-        for (i = 0; i < param.num_linhas; i++)
-        {
-            for (j = 0; j < param.num_colunas; j++)
+            setaValoracao(matrizValoracao, param);
+            for (i = 0; i < param.num_linhas; i++)
             {
-                if (mapa[i][j].verificar == 1)
-                    totalCasas += 1;
+                for (j = 0; j < param.num_colunas; j++)
+                {
+                    mapa[i][j].valor = guardaMapa[i][j];
+                    mapa[i][j].camadaExterna = 0;
+                    mapa[i][j].verificar = 0;
+                }
+            }
+
+            mapa[row][column].verificar = 1;
+
+            while (1)
+            {
+                totalCasas = 0;
+
+                for (i = 0; i < QNT_TESTE + 2; i++)
+                {
+                    vetorSolucao[i] = 0;
+                    vetorAtual[i] = 0;
+                }
+
+                progride(mapa, row, column, matrizValoracao, param, count, vetorSolucao, vetorAtual);
+
+                for (i = 1; i < QNT_TESTE + 2; i++)
+                {
+                    if (vetorSolucao[i] == 0)
+                        break;
+
+                    mapa[row][column].valor = vetorSolucao[i];
+                    verificaDireita(mapa, row, column, param, &casas, matrizValoracao);
+                    // system("clear");
+                    // imprimeMapa(mapa, param);
+                    // usleep(50000);
+                    solucaoAtual[counter][0] = 0;
+                    solucaoAtual[counter][1] = vetorSolucao[i];
+                    counter++;
+                }
+                for (i = 0; i < param.num_linhas; i++)
+                {
+                    for (j = 0; j < param.num_colunas; j++)
+                    {
+                        if (mapa[i][j].verificar == 1)
+                            totalCasas += 1;
+                    }
+                }
+                if (totalCasas >= (param.num_linhas * param.num_colunas))
+                    break;
+            }
+            // system("clear");
+            // imprimeMapa(mapa, param);
+            // printf("%d", counter);
+            // scanf("%c", &ao);
+
+            if (iLinha == jColuna)
+                letraAtual = 0;
+            else if (jColuna > iLinha)
+                letraAtual = 1;
+            else if (iLinha > jColuna)
+                letraAtual = 3;
+            else
+                letraAtual = 2;
+            if ((counter < passosMS) || (passosMS == 0))
+            {
+                passosMS = counter;
+                for (i = 0; i < counter; i++)
+                {
+                    melhorSolucao[i][0] = letraAtual;
+                    melhorSolucao[i][1] = solucaoAtual[i][1];
+                }
             }
         }
-        if (totalCasas >= (param.num_linhas * param.num_colunas - 1))
-            break;
     }
-    system("clear");
-    printf("%d", counter);
-    scanf("%c", &ao);
 
-    setaValoracao(matrizValoracao, param);
-    for (i = 0; i < param.num_linhas; i++)
-    {
-        for (j = 0; j < param.num_colunas; j++)
-        {
-            mapa[i][j].valor = guardaMapa[i][j];
-            mapa[i][j].camadaExterna = 0;
-            mapa[i][j].verificar = 0;
-        }
-    }
-    mapa[(param.num_linhas - 1)][(param.num_colunas - 1)].verificar = 1;
-    casas = 1;
-    count = 0;
 
-    while (1)
-    {
-
-        system("clear");
-        verificaDireita(mapa, 0, 0, param, &casas, matrizValoracao);
-        if (casas == (param.num_linhas * param.num_colunas))
-            break;
-        imprimeMapa(mapa, param);
-        num = retornaNumero(mapa, param, matrizValoracao);
-        mapa[0][0].valor = num;
-        usleep(50000);
-        printf("\n");
-        if (trava)
-            scanf("%c", &none);
-        solucaoAtual[count][0] = 0;
-        solucaoAtual[count][1] = num;
-        count++;
-    }
-    if ((count < passosMS) || (passosMS == 0))
-    {
-        passosMS = count;
-        for (i = 0; i < count; i++)
-        {
-            melhorSolucao[i][0] = 0;
-            melhorSolucao[i][1] = solucaoAtual[i][1];
-        }
-    }
-    // inf esq
-    if (trava)
-    {
-        printf("\ncount:%d", count);
-        scanf("%c", &none);
-    }
-    setaValoracao(matrizValoracao, param);
-    for (i = 0; i < param.num_linhas; i++)
-    {
-        for (j = 0; j < param.num_colunas; j++)
-        {
-            mapa[i][j].valor = guardaMapa[i][j];
-            mapa[i][j].camadaExterna = 0;
-            mapa[i][j].verificar = 0;
-        }
-    }
-    mapa[(param.num_linhas - 1)][0].verificar = 1;
-    casas = 1;
-    count = 0;
-    while (1)
-    {
-
-        system("clear");
-        verificaDireita(mapa, (param.num_linhas - 1), 0, param, &casas, matrizValoracao);
-        if (casas == (param.num_linhas * param.num_colunas))
-            break;
-        imprimeMapa(mapa, param);
-        num = retornaNumero(mapa, param, matrizValoracao);
-        mapa[(param.num_linhas - 1)][0].valor = num;
-        usleep(50000);
-        // if (trava)
-        //     scanf("%c", &none);
-        solucaoAtual[count][0] = 3;
-        solucaoAtual[count][1] = num;
-        count++;
-    }
-    if ((count < passosMS) || (passosMS == 0))
-    {
-        passosMS = count;
-        for (i = 0; i < count; i++)
-        {
-            melhorSolucao[i][0] = 3;
-            melhorSolucao[i][1] = solucaoAtual[i][1];
-        }
-    }
-    if (trava)
-    {
-        printf("\ncount:%d", count);
-        scanf("%c", &none);
-    }
-    // inf dir
-    setaValoracao(matrizValoracao, param);
-    for (i = 0; i < param.num_linhas; i++)
-    {
-        for (j = 0; j < param.num_colunas; j++)
-        {
-            mapa[i][j].valor = guardaMapa[i][j];
-            mapa[i][j].camadaExterna = 0;
-            mapa[i][j].verificar = 0;
-        }
-    }
-    mapa[(param.num_linhas - 1)][(param.num_colunas - 1)].verificar = 1;
-    casas = 1;
-    count = 0;
-    while (1)
-    {
-
-        system("clear");
-        verificaDireita(mapa, (param.num_linhas - 1), (param.num_colunas - 1), param, &casas, matrizValoracao);
-        if (casas == (param.num_linhas * param.num_colunas))
-            break;
-        imprimeMapa(mapa, param);
-        num = retornaNumero(mapa, param, matrizValoracao);
-        mapa[(param.num_linhas - 1)][(param.num_colunas - 1)].valor = num;
-        usleep(50000);
-        // if (trava)
-        //     scanf("%c", &none);
-        solucaoAtual[count][0] = 2;
-        solucaoAtual[count][1] = num;
-        count++;
-    }
-    if ((count < passosMS) || (passosMS == 0))
-    {
-        passosMS = count;
-        for (i = 0; i < count; i++)
-        {
-            melhorSolucao[i][0] = 2;
-            melhorSolucao[i][1] = solucaoAtual[i][1];
-        }
-    }
-    if (trava)
-    {
-        printf("\ncount:%d", count);
-        scanf("%c", &none);
-    }
-    // sup dir
-    setaValoracao(matrizValoracao, param);
-    for (i = 0; i < param.num_linhas; i++)
-    {
-        for (j = 0; j < param.num_colunas; j++)
-        {
-            mapa[i][j].valor = guardaMapa[i][j];
-            mapa[i][j].camadaExterna = 0;
-            mapa[i][j].verificar = 0;
-        }
-    }
-    mapa[0][(param.num_colunas - 1)].verificar = 1;
-    casas = 1;
-    count = 0;
-    while (1)
-    {
-
-        system("clear");
-        verificaDireita(mapa, 0, (param.num_colunas - 1), param, &casas, matrizValoracao);
-        if (casas == (param.num_linhas * param.num_colunas))
-            break;
-        imprimeMapa(mapa, param);
-        num = retornaNumero(mapa, param, matrizValoracao);
-        mapa[0][(param.num_colunas - 1)].valor = num;
-        usleep(50000);
-        // if (trava)
-        //     scanf("%c", &none);
-        solucaoAtual[count][0] = 1;
-        solucaoAtual[count][1] = num;
-        count++;
-    }
-    if ((count < passosMS) || (passosMS == 0))
-    {
-        passosMS = count;
-        for (i = 0; i < count; i++)
-        {
-            melhorSolucao[i][0] = 1;
-            melhorSolucao[i][1] = solucaoAtual[i][1];
-        }
-    }
-    if (trava)
-    {
-        printf("\ncount:%d", count);
-        scanf("%c", &none);
-    }
 
     fprintf(solu, "%d\n", passosMS);
 
