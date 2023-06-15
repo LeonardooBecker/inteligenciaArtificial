@@ -19,8 +19,6 @@
 
 #define TAM_LINHA 1024
 
-#define QNT_TESTE 2
-
 typedef struct
 {
     int verificar;
@@ -60,7 +58,7 @@ void setaValoracao(int **matrizValoracao, Parametros param)
     {
         for (j = 0; j < (param.num_colunas / 2) + 1; j++)
         {
-            int valor = (param.num_colunas * param.num_linhas*10) / (1 + abs(param.num_colunas - j) + abs(param.num_linhas - i) + abs(i - j)*abs(i - j)*abs(i - j)*abs(i - j)) + 1;
+            int valor = (param.num_colunas * param.num_linhas * 10) / (1 + abs(param.num_colunas - j) + abs(param.num_linhas - i) + abs(i - j) * abs(i - j) * abs(i - j) * abs(i - j)) + 1;
             if (i == j)
                 valor *= 3;
             // int valor = (param.num_colunas * param.num_linhas) / ((abs((param.num_linhas / 2 +1) - i)) * abs(((param.num_colunas / 2 +1 ) - j)) ) *(i+1)*(j+1);
@@ -329,7 +327,7 @@ void verificaDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     }
 }
 
-void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Parametros param, int count, int *vetorSolucao, int *vetorAtual)
+void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Parametros param, int count, int *vetorSolucao, int *vetorAtual, int qntVerificacoes)
 {
     char a;
     int totalCasas = 0;
@@ -339,6 +337,7 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
     int numero;
     int total = 0;
     Verificar **mapaAqui;
+
     mapaAqui = (Verificar **)malloc(param.num_linhas * sizeof(Verificar *));
     for (i = 0; i < param.num_linhas; i++)
         mapaAqui[i] = (Verificar *)malloc(param.num_colunas * sizeof(Verificar));
@@ -369,6 +368,9 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
         if (continua == 0)
         {
             vetorAtual[(count + 1)] = 0;
+            for (i = 0; i < param.num_linhas; i++)
+                free(mapaAqui[i]);
+            free(mapaAqui);
             return;
         }
         for (i = 0; i < param.num_linhas; i++)
@@ -426,7 +428,7 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
             if ((total > vetorSolucao[0]))
             {
                 vetorSolucao[0] = total;
-                for (i = 1; i <= (QNT_TESTE + 1); i++)
+                for (i = 1; i <= (qntVerificacoes + 1); i++)
                     vetorSolucao[i] = vetorAtual[i];
             }
         }
@@ -436,7 +438,7 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
             if (vetorSolucao[0] != 0)
                 vetorSolucao[0] = 0;
 
-            for (i = 1; i < QNT_TESTE; i++)
+            for (i = 1; i < qntVerificacoes; i++)
             {
                 if (vetorSolucao[i] == 0)
                     qntZeros++;
@@ -445,18 +447,18 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
             if (qntZeros >= vetorSolucao[0])
             {
                 vetorSolucao[0] = qntZeros;
-                for (i = 1; i <= (QNT_TESTE + 1); i++)
+                for (i = 1; i <= (qntVerificacoes + 1); i++)
                     vetorSolucao[i] = vetorAtual[i];
             }
         }
 
         // printf("%d\n", total);
-        // for (i = 0; i < QNT_TESTE + 2; i++)
+        // for (i = 0; i < qntVerificacoes + 2; i++)
         // {
         //     printf("%d ", vetorAtual[i]);
         // }
         // printf("\n");
-        // for (i = 0; i < QNT_TESTE + 2; i++)
+        // for (i = 0; i < qntVerificacoes + 2; i++)
         // {
         //     printf("%d ", vetorSolucao[i]);
         // }
@@ -466,9 +468,9 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
 
         // scanf("%c", &a);
 
-        if ((count != QNT_TESTE) && (totalCasas < param.num_colunas * param.num_linhas))
+        if ((count != qntVerificacoes) && (totalCasas < param.num_colunas * param.num_linhas))
         {
-            progride(mapaAqui, row, column, matrizValoracao, param, (count + 1), vetorSolucao, vetorAtual);
+            progride(mapaAqui, row, column, matrizValoracao, param, (count + 1), vetorSolucao, vetorAtual, qntVerificacoes);
         }
         else
         {
@@ -480,6 +482,9 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
             }
             if (continua == 0)
             {
+                for (i = 0; i < param.num_linhas; i++)
+                    free(mapaAqui[i]);
+                free(mapaAqui);
                 vetorAtual[(count + 1)] = 0;
                 return;
             }
@@ -583,15 +588,15 @@ int main(int argc, char *argv[])
 
     setaValoracao(matrizValoracao, param);
 
-    for (i = 0; i < param.num_linhas; i++)
-    {
-        for (j = 0; j < param.num_colunas; j++)
-        {
-            printf("%4d ", matrizValoracao[i][j]);
-        }
-        printf("\n");
-    }
-    scanf("%c", &ao);
+    // for (i = 0; i < param.num_linhas; i++)
+    // {
+    //     for (j = 0; j < param.num_colunas; j++)
+    //     {
+    //         printf("%4d ", matrizValoracao[i][j]);
+    //     }
+    //     printf("\n");
+    // }
+    // scanf("%c", &ao);
 
     int **melhorSolucao;
     melhorSolucao = (int **)calloc(param.num_linhas * param.num_colunas, sizeof(int *));
@@ -609,11 +614,17 @@ int main(int argc, char *argv[])
     int passosMS = 0;
     char none;
 
+    int qntVerificacoes = 0;
+
+    qntVerificacoes = 40 / param.num_cores;
+    if ((qntVerificacoes > 0) && (param.num_linhas > 50 || param.num_colunas > 50))
+        qntVerificacoes--;
+
     int *vetorSolucao;
-    vetorSolucao = (int *)calloc((QNT_TESTE + 2), sizeof(int));
+    vetorSolucao = (int *)calloc((qntVerificacoes + 2), sizeof(int));
 
     int *vetorAtual;
-    vetorAtual = (int *)calloc((QNT_TESTE + 2), sizeof(int));
+    vetorAtual = (int *)calloc((qntVerificacoes + 2), sizeof(int));
 
     int matrizCantos[2][2];
     matrizCantos[0][0] = 0;
@@ -658,15 +669,15 @@ int main(int argc, char *argv[])
             {
                 totalCasas = 0;
 
-                for (i = 0; i < QNT_TESTE + 2; i++)
+                for (i = 0; i < qntVerificacoes + 2; i++)
                 {
                     vetorSolucao[i] = 0;
                     vetorAtual[i] = 0;
                 }
 
-                progride(mapa, row, column, matrizValoracao, param, count, vetorSolucao, vetorAtual);
+                progride(mapa, row, column, matrizValoracao, param, count, vetorSolucao, vetorAtual, qntVerificacoes);
 
-                for (i = 1; i < QNT_TESTE + 2; i++)
+                for (i = 1; i < qntVerificacoes + 2; i++)
                 {
                     if (vetorSolucao[i] == 0)
                         break;
@@ -716,8 +727,6 @@ int main(int argc, char *argv[])
         }
     }
 
-
-
     fprintf(solu, "%d\n", passosMS);
 
     for (i = 0; i < passosMS; i++)
@@ -746,9 +755,24 @@ int main(int argc, char *argv[])
     fclose(arq);
     fclose(solu);
 
-    for (i = 0; i < parametros[0]; i++)
+    for (i = 0; i < param.num_linhas; i++)
         free(mapa[i]);
     free(mapa);
+    for (i = 0; i < param.num_linhas; i++)
+        free(matrizValoracao[i]);
+    free(matrizValoracao);
+    for (i = 0; i < param.num_linhas; i++)
+        free(guardaMapa[i]);
+    free(guardaMapa);
+    for (i = 0; i < param.num_linhas * param.num_colunas; i++)
+        free(melhorSolucao[i]);
+    free(melhorSolucao);
+    for (i = 0; i < param.num_linhas * param.num_colunas; i++)
+        free(solucaoAtual[i]);
+    free(solucaoAtual);
+
+    free(vetorSolucao);
+    free(vetorAtual);
 
     return 0;
 }
