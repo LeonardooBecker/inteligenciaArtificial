@@ -24,10 +24,9 @@ int main(int argc, char *argv[])
     int passosMS = 0;
     int row;
     int column;
-    int canto;
+    int cantoAtual;
     int counter;
     int qntVerificacoes = 0;
-    int ladoAtual = 0;
     Verificar **mapa;
     int **guardaMapa;
 
@@ -127,13 +126,13 @@ int main(int argc, char *argv[])
 
     passosMS = 0;
 
-    for (canto = 0; canto < 4; canto++)
+    for (cantoAtual = 0; cantoAtual < 4; cantoAtual++)
     {
 
         // printf("processando....\n");
 
-        row = matrizCantos[canto][0];
-        column = matrizCantos[canto][1];
+        row = matrizCantos[cantoAtual][0];
+        column = matrizCantos[cantoAtual][1];
 
         counter = 0;
 
@@ -174,19 +173,17 @@ int main(int argc, char *argv[])
                 break;
         }
 
-        ladoAtual = canto;
-
+        // Verifica se melhor solução
         if ((counter < passosMS) || (passosMS == 0))
         {
             passosMS = counter;
             for (i = 0; i < counter; i++)
             {
-                melhorSolucao[i][0] = ladoAtual;
+                melhorSolucao[i][0] = cantoAtual;
                 melhorSolucao[i][1] = solucaoAtual[i][1];
             }
         }
     }
-
 
     apresentaResultado(passosMS, melhorSolucao);
 
