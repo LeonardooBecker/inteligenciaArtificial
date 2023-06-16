@@ -64,5 +64,6 @@ void preencheArquivo(int passosMS, int **melhorSolucao)
             break;
         }
     }
+    fprintf(solu, "\n");
     fclose(solu);
 }

@@ -29,13 +29,10 @@ int main(int argc, char *argv[])
     int counter;
     int qntVerificacoes = 0;
     int ladoAtual = 0;
-
-    // char ao;
-
     Verificar **mapa;
     int **guardaMapa;
 
-    srand(time(NULL));
+    // char ao;
 
     arq = fopen(nome_arquivo, "r");
     if (arq == NULL)
