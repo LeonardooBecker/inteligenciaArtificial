@@ -1,4 +1,4 @@
 #/bin/bash
-gcc -Wall main.c -o main
-./geramapa 30 30 3 > aux.txt
+make
+./geramapa 22 22 6 > aux.txt
 ./main aux.txt
