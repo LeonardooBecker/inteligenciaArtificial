@@ -7,7 +7,7 @@ void trackingDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     Verificar *direita;
     Verificar *atual;
 
-    if (j < (param.num_linhas - 1))
+    if (j < (param.num_colunas - 1))
         direita = &(mapa[i][j + 1]);
     atual = &(mapa[i][j]);
 
@@ -15,13 +15,13 @@ void trackingDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
     Backtrack direita
     */
 
-    if ((j < (param.num_linhas - 1)) && (direita->verificar == 1) && (direita->valor != atual->valor) && (atual->camadaExterna == 0))
+    if ((j < (param.num_colunas - 1)) && (direita->verificar == 1) && (direita->valor != atual->valor) && (atual->camadaExterna == 0))
     {
         direita->valor = atual->valor;
         atual->camadaExterna = 0;
         verificaMapa(mapa, i, (j + 1), param, casas);
     }
-    if ((j < (param.num_linhas - 1)) && (direita->verificar == 0) && (direita->valor == atual->valor) && (atual->camadaExterna == 0))
+    if ((j < (param.num_colunas - 1)) && (direita->verificar == 0) && (direita->valor == atual->valor) && (atual->camadaExterna == 0))
     {
         *casas += 1;
         atual->camadaExterna = 0;
@@ -30,7 +30,7 @@ void trackingDireita(Verificar **mapa, int i, int j, Parametros param, int *casa
         direita->camadaExterna = 0;
         verificaMapa(mapa, i, (j + 1), param, casas);
     }
-    if ((j < (param.num_linhas - 1)) && (direita->verificar == 0))
+    if ((j < (param.num_colunas - 1)) && (direita->verificar == 0))
     {
         if ((atual->camadaExterna == 0) && (atual->valor != direita->valor))
         {
@@ -49,7 +49,7 @@ void trackingBaixo(Verificar **mapa, int i, int j, Parametros param, int *casas)
 {
     Verificar *baixo;
     Verificar *atual;
-    if (i < (param.num_colunas - 1))
+    if (i < (param.num_linhas - 1))
         baixo = &(mapa[i + 1][j]);
     atual = &(mapa[i][j]);
 
@@ -57,13 +57,13 @@ void trackingBaixo(Verificar **mapa, int i, int j, Parametros param, int *casas)
         Backtrack baixo
     */
 
-    if ((i < (param.num_colunas - 1) && (baixo->verificar == 1) && (baixo->valor != atual->valor)) && (atual->camadaExterna == 0))
+    if ((i < (param.num_linhas - 1) && (baixo->verificar == 1) && (baixo->valor != atual->valor)) && (atual->camadaExterna == 0))
     {
         atual->camadaExterna = 0;
         baixo->valor = atual->valor;
         verificaMapa(mapa, (i + 1), j, param, casas);
     }
-    if ((i < (param.num_colunas - 1) && (baixo->verificar == 0) && (baixo->valor == atual->valor)) && (atual->camadaExterna == 0))
+    if ((i < (param.num_linhas - 1) && (baixo->verificar == 0) && (baixo->valor == atual->valor)) && (atual->camadaExterna == 0))
     {
         *casas += 1;
         atual->camadaExterna = 0;
@@ -72,7 +72,7 @@ void trackingBaixo(Verificar **mapa, int i, int j, Parametros param, int *casas)
         baixo->camadaExterna = 0;
         verificaMapa(mapa, (i + 1), j, param, casas);
     }
-    else if (i < (param.num_colunas - 1) && (baixo->verificar == 0))
+    else if (i < (param.num_linhas - 1) && (baixo->verificar == 0))
     {
         if ((atual->camadaExterna == 0) && (atual->valor != baixo->valor))
         {
@@ -140,7 +140,7 @@ void trackingCima(Verificar **mapa, int i, int j, Parametros param, int *casas)
     /*
         Backtrack cima
     */
-   
+
     if ((i > 0) && (cima->verificar == 1) && (cima->valor != atual->valor) && (atual->camadaExterna == 0))
     {
         atual->camadaExterna = 0;

@@ -24,8 +24,7 @@ int main(int argc, char *argv[])
     int passosMS = 0;
     int row;
     int column;
-    int iLinha;
-    int jColuna;
+    int canto;
     int counter;
     int qntVerificacoes = 0;
     int ladoAtual = 0;
@@ -61,7 +60,6 @@ int main(int argc, char *argv[])
                     i++;
                     ptr = strtok(NULL, " ");
                 }
-
                 // alocar matriz dinamicamente
                 mapa = (Verificar **)malloc(parametros[0] * sizeof(Verificar *));
                 for (i = 0; i < parametros[0]; i++)
@@ -82,8 +80,8 @@ int main(int argc, char *argv[])
                 {
                     mapa[j][i].valor = atoi(ptr);
                     guardaMapa[j][i] = atoi(ptr);
-                    mapa[i][j].verificar = 0;
-                    mapa[i][j].camadaExterna = 0;
+                    mapa[j][i].verificar = 0;
+                    mapa[j][i].camadaExterna = 0;
                     i++;
                     ptr = strtok(NULL, " ");
                 }
@@ -107,9 +105,9 @@ int main(int argc, char *argv[])
     for (i = 0; i < (param.num_linhas * param.num_colunas); i++)
         solucaoAtual[i] = (int *)calloc(2, sizeof(int));
 
-    qntVerificacoes = 40 / param.num_cores;
-    if ((qntVerificacoes > 0) && (param.num_linhas > 50 || param.num_colunas > 50))
-        qntVerificacoes--;
+    qntVerificacoes = 20 / param.num_cores;
+    // if ((qntVerificacoes > 0) && (param.num_linhas > 50 || param.num_colunas > 50))
+    // qntVerificacoes--;
 
     int *vetorSolucao;
     vetorSolucao = (int *)calloc((qntVerificacoes + 2), sizeof(int));
@@ -117,81 +115,80 @@ int main(int argc, char *argv[])
     int *vetorAtual;
     vetorAtual = (int *)calloc((qntVerificacoes + 2), sizeof(int));
 
-    int matrizCantos[2][2];
+    int matrizCantos[4][2];
     matrizCantos[0][0] = 0;
-    matrizCantos[0][1] = param.num_colunas - 1;
     matrizCantos[1][0] = 0;
-    matrizCantos[1][1] = param.num_linhas - 1;
+    matrizCantos[2][0] = param.num_linhas - 1;
+    matrizCantos[3][0] = param.num_linhas - 1;
+    matrizCantos[0][1] = 0;
+    matrizCantos[1][1] = param.num_colunas - 1;
+    matrizCantos[2][1] = param.num_colunas - 1;
+    matrizCantos[3][1] = 0;
 
     passosMS = 0;
-    system("clear");
 
-    for (iLinha = 0; iLinha < 2; iLinha++)
+    for (canto = 0; canto < 4; canto++)
     {
-        for (jColuna = 0; jColuna < 2; jColuna++)
+
+        // printf("processando....\n");
+
+        row = matrizCantos[canto][0];
+        column = matrizCantos[canto][1];
+
+        counter = 0;
+
+        setaValoracao(matrizValoracao, param);
+
+        resetaMapa(guardaMapa, mapa, param);
+
+        mapa[row][column].verificar = 1;
+
+        while (1)
         {
-
-            printf("processando....\n");
-
-            row = matrizCantos[iLinha][iLinha];
-            column = matrizCantos[iLinha][jColuna];
-
-            counter = 0;
-
-            setaValoracao(matrizValoracao, param);
-
-            resetaMapa(guardaMapa, mapa, param);
-
-            mapa[row][column].verificar = 1;
-
-            while (1)
+            // Limpa vetores
+            for (i = 0; i < qntVerificacoes + 2; i++)
             {
-
-                // Limpa vetores
-                for (i = 0; i < qntVerificacoes + 2; i++)
-                {
-                    vetorSolucao[i] = 0;
-                    vetorAtual[i] = 0;
-                }
-
-                progride(mapa, row, column, matrizValoracao, param, count, vetorSolucao, vetorAtual, qntVerificacoes);
-
-                for (i = 1; i < qntVerificacoes + 2; i++)
-                {
-                    if (vetorSolucao[i] == 0)
-                        break;
-
-                    mapa[row][column].valor = vetorSolucao[i];
-                    verificaMapa(mapa, row, column, param, &casas);
-                    solucaoAtual[counter][0] = 0;
-                    solucaoAtual[counter][1] = vetorSolucao[i];
-                    counter++;
-
-                    // Comentario para debug
-                    // system("clear");
-                    // imprimeMapa(mapa, param);
-                    // scanf("%c", &ao);
-                }
-
-                if (continua(mapa, param))
-                    break;
+                vetorSolucao[i] = 0;
+                vetorAtual[i] = 0;
             }
 
-            ladoAtual = defineLado(iLinha, jColuna);
+            progride(mapa, row, column, matrizValoracao, param, count, vetorSolucao, vetorAtual, qntVerificacoes);
 
-            if ((counter < passosMS) || (passosMS == 0))
+            for (i = 1; i < qntVerificacoes + 2; i++)
             {
-                passosMS = counter;
-                for (i = 0; i < counter; i++)
-                {
-                    melhorSolucao[i][0] = ladoAtual;
-                    melhorSolucao[i][1] = solucaoAtual[i][1];
-                }
+                if (vetorSolucao[i] == 0)
+                    break;
+
+                mapa[row][column].valor = vetorSolucao[i];
+                verificaMapa(mapa, row, column, param, &casas);
+                solucaoAtual[counter][0] = 0;
+                solucaoAtual[counter][1] = vetorSolucao[i];
+                counter++;
+                // Comentario para debug
+                // system("clear");
+                // imprimeMapa(mapa, param);
+                // scanf("%c", &ao);
+            }
+
+            if (continua(mapa, param))
+                break;
+        }
+
+        ladoAtual = canto;
+
+        if ((counter < passosMS) || (passosMS == 0))
+        {
+            passosMS = counter;
+            for (i = 0; i < counter; i++)
+            {
+                melhorSolucao[i][0] = ladoAtual;
+                melhorSolucao[i][1] = solucaoAtual[i][1];
             }
         }
     }
 
-    preencheArquivo(passosMS, melhorSolucao);
+
+    apresentaResultado(passosMS, melhorSolucao);
 
     fclose(arq);
 

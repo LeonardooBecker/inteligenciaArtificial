@@ -2,7 +2,7 @@ nomePrograma=main
 
 objs=main.o setaMapa.o analisaTabuleiro.o progride.o operadores.o
 
-CFLAGS := -Wall -std=c99
+CFLAGS := -Wall -std=c99 -lm
 
 all: $(nomePrograma)
 

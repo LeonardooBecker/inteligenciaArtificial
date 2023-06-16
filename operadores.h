@@ -6,6 +6,6 @@ int continua(Verificar **mapa, Parametros param);
 
 int defineLado(int iLinha, int jColuna);
 
-void preencheArquivo(int passosMS, int **melhorSolucao);
+void apresentaResultado(int passosMS, int **melhorSolucao);
 
 #endif

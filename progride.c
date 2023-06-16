@@ -142,7 +142,7 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
         // printf("\n");
 
         // imprimeMapa(mapaAqui, param);
-        // scanf("%c", &a); 
+        // scanf("%c", &a);
 
         if ((count != qntVerificacoes) && (totalCasas < param.num_colunas * param.num_linhas))
         {

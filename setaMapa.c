@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "setaMapa.h"
 
 #define ANSI_RESET "\033[0m"
@@ -16,7 +17,7 @@
 
 void clonaMapa(Verificar **mapa, Verificar **mapaClone, Parametros param)
 {
-    int i,j;
+    int i, j;
     for (i = 0; i < param.num_linhas; i++)
     {
         for (j = 0; j < param.num_colunas; j++)
@@ -30,7 +31,7 @@ void clonaMapa(Verificar **mapa, Verificar **mapaClone, Parametros param)
 
 void resetaMapa(int **mapa, Verificar **mapaClone, Parametros param)
 {
-    int i,j;
+    int i, j;
     for (i = 0; i < param.num_linhas; i++)
     {
         for (j = 0; j < param.num_colunas; j++)
@@ -49,9 +50,17 @@ void setaValoracao(int **matrizValoracao, Parametros param)
     {
         for (j = 0; j < (param.num_colunas / 2) + 1; j++)
         {
-            int valor = (param.num_colunas * param.num_linhas * param.num_cores) / (abs(i - j) * abs(i - j) + 1) + 1;
-            if (i == j)
-                valor *= 2;
+
+            int a = param.num_linhas - 1;
+            int b = 1 - param.num_colunas;
+            int c = param.num_colunas * 1 - 1 * param.num_linhas;
+            double x0 = j; 
+            double y0 = i; 
+            double distancia = fabs(a * x0 + b * y0 + c) / sqrt(a * a + b * b); 
+
+            int valor = (param.num_colunas * param.num_linhas * param.num_cores) / (distancia*distancia*distancia + 1);
+            if(distancia==0)
+                valor*=2;
             matrizValoracao[i][j] = valor;
             matrizValoracao[(param.num_linhas - i - 1)][(param.num_colunas - j - 1)] = valor;
             matrizValoracao[(param.num_linhas - i - 1)][j] = valor;
