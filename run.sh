@@ -1,6 +1,6 @@
 #/bin/bash
 make
-./geramapa 26 73 5 > mapaTeste.txt
+./geramapa 100 100 3 > mapaTeste.txt
 ./main mapaTeste.txt > mapaTesteResultado.txt
 cat mapaTeste.txt mapaTesteResultado.txt | ./verifica
 echo $?

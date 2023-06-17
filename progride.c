@@ -19,15 +19,13 @@ void retornaVetor(Verificar **mapa, Parametros param, int *vetorCores)
     }
 }
 
-void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Parametros param, int count, int *vetorSolucao, int *vetorAtual, int qntVerificacoes)
+void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Parametros param, int posicaoAtual, int *vetorSolucao, int *vetorAtual, int qntVerificacoes)
 {
-    // char a;
-    int totalCasas = 0;
     int casas = 0;
-    int i, j;
+    int valorMapa = 0;
+    int i;
     int continua;
     int numero;
-    int total = 0;
 
     Verificar **mapaAqui;
 
@@ -40,7 +38,7 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
     for (i = 0; i < param.num_cores; i++)
         opcoes[i] = 0;
 
-    verificaMapa(mapa, row, column, param, &casas);
+    verificaMapa(mapa, row, column, param, &casas, matrizValoracao, &valorMapa);
 
     // Vetor contendo as cores que se encontram na camada externa considerando o preenchimento atual do tabuleiro
     retornaVetor(mapa, param, opcoes);
@@ -62,7 +60,7 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
         }
         if (continua == 0)
         {
-            vetorAtual[(count + 1)] = 0;
+            vetorAtual[(posicaoAtual + 1)] = 0;
             for (i = 0; i < param.num_linhas; i++)
                 free(mapaAqui[i]);
             free(mapaAqui);
@@ -74,44 +72,31 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
 
         mapaAqui[row][column].valor = numero;
 
-        totalCasas = 0;
+        casas = 1;
 
-        verificaMapa(mapaAqui, row, column, param, &casas);
+        valorMapa = matrizValoracao[row][column];
+
+        verificaMapa(mapaAqui, row, column, param, &casas, matrizValoracao, &valorMapa);
 
         setaValoracao(matrizValoracao, param);
 
-        // quantidades de casas preenchidas no mapa e a respectiva soma de seus valores
-        totalCasas = 1;
-        total = 0;
-        for (i = 0; i < param.num_linhas; i++)
-        {
-            for (j = 0; j < param.num_colunas; j++)
-            {
-                if (mapaAqui[i][j].verificar == 1)
-                {
-                    totalCasas += 1;
-                    total += matrizValoracao[i][j];
-                }
-            }
-        }
-
-        vetorAtual[(count + 1)] = numero;
+        vetorAtual[(posicaoAtual + 1)] = numero;
 
         // Se o mapa não tiver sido preenchido por completo
-        if (totalCasas < (param.num_linhas * param.num_colunas))
+        if (casas < (param.num_linhas * param.num_colunas))
         {
-            if ((vetorSolucao[0] == 0) || ((total > vetorSolucao[0]) && (vetorSolucao[0] > param.num_cores)))
+            if ((vetorSolucao[0] == 0) || ((valorMapa > vetorSolucao[0]) && (vetorSolucao[0] > matrizValoracao[row][column])))
             {
-                vetorSolucao[0] = total;
+                vetorSolucao[0] = valorMapa;
                 for (i = 1; i <= (qntVerificacoes + 1); i++)
                     vetorSolucao[i] = vetorAtual[i];
             }
         }
-        // Mapa preenchido por completo - possívelmente todas posições reservas ao vetor não serão usadas
+        // Mapa preenchido por completo - possívelmente todas posições reservadas ao vetor não serão usadas
         else
         {
-            int qntZeros = 0;
-            if (vetorSolucao[0] > param.num_cores)
+            int qntZeros = 1;
+            if (vetorSolucao[0] > matrizValoracao[row][column])
                 vetorSolucao[0] = 0;
 
             for (i = 1; i <= (qntVerificacoes + 1); i++)
@@ -128,8 +113,9 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
             }
         }
 
-        // Sequência comentada - utilizada para debug.
-        // printf("%d\n", total);
+        // Sequência comentada - utilizada para análise do código.
+        // char a;
+        // printf("(%d - %d - %d)\n", valorMapa, valorMapa, casas);
         // for (i = 0; i < qntVerificacoes + 2; i++)
         // {
         //     printf("%d ", vetorAtual[i]);
@@ -144,9 +130,9 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
         // imprimeMapa(mapaAqui, param);
         // scanf("%c", &a);
 
-        if ((count != qntVerificacoes) && (totalCasas < param.num_colunas * param.num_linhas))
+        if ((posicaoAtual != qntVerificacoes) && (casas < param.num_colunas * param.num_linhas))
         {
-            progride(mapaAqui, row, column, matrizValoracao, param, (count + 1), vetorSolucao, vetorAtual, qntVerificacoes);
+            progride(mapaAqui, row, column, matrizValoracao, param, (posicaoAtual + 1), vetorSolucao, vetorAtual, qntVerificacoes);
         }
         else
         {
@@ -162,7 +148,7 @@ void progride(Verificar **mapa, int row, int column, int **matrizValoracao, Para
                 for (i = 0; i < param.num_linhas; i++)
                     free(mapaAqui[i]);
                 free(mapaAqui);
-                vetorAtual[(count + 1)] = 0;
+                vetorAtual[(posicaoAtual + 1)] = 0;
                 return;
             }
         }

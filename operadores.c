@@ -2,20 +2,21 @@
 #include <stdlib.h>
 #include "operadores.h"
 
-int continua(Verificar **mapa, Parametros param)
+int defineLimite(Parametros param)
 {
-    int i, j;
-    int totalCasas = 0;
-    for (i = 0; i < param.num_linhas; i++)
-    {
-        for (j = 0; j < param.num_colunas; j++)
-        {
-            if (mapa[i][j].verificar == 1)
-                totalCasas += 1;
-        }
-    }
+    int qntVerificacoes;
+    qntVerificacoes = 30 / param.num_cores;
 
-    if (totalCasas < (param.num_linhas * param.num_colunas))
+    if (param.num_cores <= 5)
+    {
+        qntVerificacoes*=3/2;
+    }
+    return qntVerificacoes;
+}
+
+int continua(int casas, Parametros param)
+{
+    if (casas < (param.num_linhas * param.num_colunas))
         return 0;
     else
         return 1;
@@ -45,4 +46,18 @@ void apresentaResultado(int passosMS, int **melhorSolucao)
         }
     }
     printf("\n");
+}
+
+void verificaSolucao(int cantoAtual, int counter, int *passosMS, int **melhorSolucao, int **solucaoAtual)
+{
+    int i;
+    if ((counter < *passosMS) || (*passosMS == 0))
+    {
+        *passosMS = counter;
+        for (i = 0; i < counter; i++)
+        {
+            melhorSolucao[i][0] = cantoAtual;
+            melhorSolucao[i][1] = solucaoAtual[i][1];
+        }
+    }
 }
