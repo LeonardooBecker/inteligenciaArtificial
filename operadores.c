@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include "operadores.h"
 
+int **alocarMatriz(int qntLinha,int qntColuna)
+{
+    int i;
+    int **matriz;
+        matriz = (int **)calloc(qntLinha, sizeof(int *));
+    for (i = 0; i < qntLinha; i++)
+        matriz[i] = (int *)calloc(qntColuna, sizeof(int));
+    return matriz;
+}
+
 int defineLimite(Parametros param)
 {
     int qntVerificacoes;
@@ -11,6 +21,10 @@ int defineLimite(Parametros param)
     {
         qntVerificacoes*=3/2;
     }
+
+    if(param.num_cores>=15 && (param.num_colunas>=50 || param.num_linhas>=50))
+        qntVerificacoes--;
+
     return qntVerificacoes;
 }
 

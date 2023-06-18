@@ -2,6 +2,8 @@
 #define _operadores_
 #include "estruturas.h"
 
+int **alocarMatriz(int qntLinha,int qntColuna);
+
 int defineLimite(Parametros param);
 
 int continua(int casas, Parametros param);
