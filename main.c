@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     int **solucaoAtual;
     
     Parametros param;
+    // Leitura dos parâmetros de linha, coluna e cor.
     scanf("%d", &param.num_linhas);
     scanf("%d", &param.num_colunas);
     scanf("%d", &param.num_cores);
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
     melhorSolucao=alocarMatriz((param.num_linhas*param.num_colunas),2);
     solucaoAtual=alocarMatriz((param.num_linhas*param.num_colunas),2);
 
+    // Preenche o tabuleiro
     for (i = 0; i < param.num_linhas; i++)
     {
         for (j = 0; j < param.num_colunas; j++)
