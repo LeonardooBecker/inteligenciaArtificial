@@ -27,7 +27,7 @@ Com isso, o algoritmo tende a andar pelas diagonais principais, dado que esses v
 ## Funcionamento do código
 
 ### defineLimite()
-A função *defineLimite()* é resposável por retornar um valor que será a profundidade máxima expandida para cada busca em profundidade realizada.
+A função *defineLimite()* é resposável por retornar um valor que será a profundidade máxima expandida para cada busca em profundidade realizada.  
 O cálculo desse valor é feito através dos parâmetros específicos de cada mapa.
 
 ### setaMapa()
