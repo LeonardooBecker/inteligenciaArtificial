@@ -41,4 +41,27 @@ A função *verificaMapa()* é responsáivel por realizar o backtracking do mapa
 ### main
 
 O arquivo principal coordena o chamado das funções anteriormente descritas.  
-Para cada resultado de busca gerado pela *progride()*, seu retorno é tratado pela função *main*, emendando próximas chamadas que persiste enquanto todas as posições do mapa não tiverem sido pintadas.
+Para cada resultado de busca gerado pela *progride()*, seu retorno é tratado pela função *main*, emendando próximas chamadas que persiste enquanto todas as posições do mapa não tiverem sido pintadas.  
+Esse processo se repete para os 4 cantos do mapa. O canto que gerar a menor quantidade de passos será o escolhido como resultado final.
+
+## Utilização
+
+### Compilação
+
+Primeiro é necessário compilar o código através do comando:
+
+```bash
+make
+```
+Com isso será gerado o código fonte *main*.
+
+### Execução
+
+Como foi proposto receber o mapa através da entrada padrão do sistema, tendo o mapa salvo as características necessárias, basta executar:
+
+```c
+./main < nome_arquivo.txt
+```
+
+
+
